@@ -7,7 +7,8 @@ const port = 3000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => res.send(`
+app.get("/", (req, res) =>
+  res.send(`
   <html>
     <head><title>Success!</title></head>
     <body>
@@ -15,14 +16,18 @@ app.get("/", (req, res) => res.send(`
       <img src="https://media.giphy.com/media/XreQmk7ETCak0/giphy.gif" alt="Cool kid doing thumbs up" />
     </body>
   </html>
-`));
+`)
+);
 
 app.post("/github", (req, res) => {
-  const content = ":wave: Hi mom!";
-  const avatarUrl = "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif";
+  const content = {
+    repoName: req.body.repository.name,
+    userName: req.body.sender.login,
+  };
+  const avatarUrl = req.body.sender.avatar_url;
   axios
     .post(process.env.DISCORD_WEBHOOK_URL, {
-      content: content,
+      content: `${content.userName} just starred your ${content.repoName} repo! 🚀`,
       embeds: [
         {
           image: {
@@ -39,11 +44,11 @@ app.post("/github", (req, res) => {
 });
 
 app.use((error, req, res, next) => {
-  res.status(500)
-  res.send({error: error})
-  console.error(error.stack)
-  next(error)
-})
+  res.status(500);
+  res.send({ error: error });
+  console.error(error.stack);
+  next(error);
+});
 
 app.listen(port, () =>
   console.log(`Example app listening at http://localhost:${port}`)
